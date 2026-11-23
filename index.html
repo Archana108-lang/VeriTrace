@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriTrace | Fraud Operations Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --card-bg: #111827;
+            --card-border: #1f2937;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent: #38bdf8;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 24px;
+        }
+
+        .wrapper { max-width: 1200px; margin: 0 auto; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 24px;
+        }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand-icon {
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; font-weight: bold;
+        }
+        .brand h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.5px; }
+        .brand span { font-size: 0.8rem; color: var(--text-muted); display: block; }
+        .live-badge {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
+            padding: 6px 14px; border-radius: 999px;
+            font-size: 0.8rem; font-weight: 600;
+        }
+        .pulse {
+            width: 8px; height: 8px; background: var(--success);
+            border-radius: 50%; animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 18px 22px;
+            border-radius: 12px;
+        }
+        .kpi-title { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 1.8rem; font-weight: 700; margin-top: 4px; }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 24px;
+        }
+        .card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 18px;
+        }
+        .card-header h2 { font-size: 1.05rem; font-weight: 600; }
+
+        .presets { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+        .preset-btn {
+            background: #1f2937; border: 1px solid #374151;
+            color: var(--text-muted); font-size: 0.75rem;
+            padding: 6px 10px; border-radius: 6px; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .preset-btn:hover { border-color: var(--accent); color: white; }
+
+        .form-group { margin-bottom: 14px; }
+        label { display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px; }
+        input, select {
+            width: 100%; padding: 10px 12px;
+            background: #090d16; border: 1px solid #374151;
+            border-radius: 8px; color: white; font-size: 0.95rem;
+            outline: none; transition: border-color 0.2s;
+        }
+        input::placeholder { color: #6b7280; }
+        input:focus, select:focus { border-color: var(--accent); }
+
+        .analyze-btn {
+            width: 100%; padding: 12px; margin-top: 8px;
+            background: linear-gradient(135deg, #0284c7, #2563eb);
+            border: none; border-radius: 8px;
+            color: white; font-weight: 600; font-size: 0.95rem;
+            cursor: pointer; transition: opacity 0.2s;
+        }
+        .analyze-btn:hover { opacity: 0.92; }
+
+        .verdict-panel {
+            display: flex; align-items: center; gap: 24px;
+            background: #090d16; border: 1px solid var(--card-border);
+            padding: 20px; border-radius: 12px; margin-bottom: 22px;
+        }
+        .gauge {
+            width: 96px; height: 96px; border-radius: 50%;
+            background: conic-gradient(var(--accent) 0%, #1f2937 0%);
+            display: flex; align-items: center; justify-content: center;
+            position: relative; flex-shrink: 0;
+        }
+        .gauge-inner {
+            width: 76px; height: 76px; background: #090d16;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1.25rem;
+        }
+        .status-pill {
+            display: inline-block; padding: 4px 12px; border-radius: 6px;
+            font-size: 0.8rem; font-weight: 700; letter-spacing: 0.4px;
+            background: #1f2937; color: var(--text-muted); margin-bottom: 6px;
+        }
+        .verdict-desc { font-size: 0.85rem; color: var(--text-muted); }
+
+        .shap-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; }
+        .shap-item { margin-bottom: 12px; }
+        .shap-meta { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 5px; }
+        .shap-track { background: #1f2937; height: 8px; border-radius: 99px; overflow: hidden; }
+        .shap-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+
+        .clear-btn {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: var(--danger);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .clear-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+        .row-del-btn {
+            background: transparent;
+            border: 1px solid #374151;
+            color: var(--text-muted);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .row-del-btn:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th {
+            text-align: left; padding: 12px;
+            color: var(--text-muted); font-weight: 600;
+            border-bottom: 1px solid var(--card-border);
+        }
+        td { padding: 12px; border-bottom: 1px solid #1a2232; }
+        .badge-block { background: rgba(239, 68, 68, 0.15); color: var(--danger); padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; }
+        .badge-safe { background: rgba(16, 185, 129, 0.15); color: var(--success); padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; }
+
+        @media (max-width: 850px) {
+            .main-grid, .kpi-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <header>
+        <div class="brand">
+            <div class="brand-icon">🛡️</div>
+            <div>
+                <h1>VeriTrace</h1>
+                <span>Banking Fraud Intelligence & Explainable Risk Scoring (INR)</span>
+            </div>
+        </div>
+        <div class="live-badge">
+            <div class="pulse"></div>
+            Engine Active • SQLite Persistent Storage
+        </div>
+    </header>
+
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-title">Transactions Analyzed</div>
+            <div class="kpi-value" id="kpi-total">0</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">High-Risk Blocked</div>
+            <div class="kpi-value" id="kpi-blocked" style="color: var(--danger);">0</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Approved Safe</div>
+            <div class="kpi-value" id="kpi-safe" style="color: var(--success);">0</div>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <div class="card">
+            <div class="card-header">
+                <h2>Transaction Simulator</h2>
+            </div>
+
+            <div class="presets">
+                <button class="preset-btn" onclick="loadPreset(450, 14, 3, 0, 1)">☕ Normal Cafe (₹450)</button>
+                <button class="preset-btn" onclick="loadPreset(300, 14, 2, 0, 7)">⚡ Rapid Card Testing (7 swipes)</button>
+                <button class="preset-btn" onclick="loadPreset(85000, 3, 180, 1, 1)">🚨 3 AM Foreign Scam (₹85,000)</button>
+            </div>
+
+            <div class="form-group">
+                <label>Transaction Amount (₹ INR)</label>
+                <input type="number" id="amount" placeholder="e.g., 450 or 85000" step="1">
+            </div>
+
+            <div class="form-group">
+                <label>Hour of Day (0 – 23)</label>
+                <input type="number" id="hour" placeholder="e.g., 14 (2 PM) or 3 (3 AM)" min="0" max="23">
+            </div>
+
+            <div class="form-group">
+                <label>Distance from Home Location (km)</label>
+                <input type="number" id="distance" placeholder="e.g., 2 (local) or 180 (outstation)">
+            </div>
+
+            <div class="form-group">
+                <label>Swipes / Transactions in Last 1 Hour</label>
+                <input type="number" id="tx_velocity" placeholder="e.g., 1 (normal) or 7 (rapid testing)" min="1">
+            </div>
+
+            <div class="form-group">
+                <label>Transaction Region</label>
+                <select id="foreign">
+                    <option value="" disabled selected>Select region (Domestic or International)...</option>
+                    <option value="0">Domestic (India)</option>
+                    <option value="1">International / Foreign Merchant</option>
+                </select>
+            </div>
+
+            <button class="analyze-btn" id="submit-btn" onclick="analyzeTransaction()">Run Real-Time Risk Scan</button>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>AI Risk Assessment & SHAP Breakdown</h2>
+            </div>
+
+            <div class="verdict-panel">
+                <div class="gauge" id="gauge">
+                    <div class="gauge-inner" id="score-text">--%</div>
+                </div>
+                <div>
+                    <div class="status-pill" id="status-pill">AWAITING INPUT</div>
+                    <p class="verdict-desc" id="verdict-desc">
+                        Enter transaction details or click a quick scenario button on the left to inspect risk drivers.
+                    </p>
+                </div>
+            </div>
+
+            <div class="shap-title">FEATURE IMPACT ON DECISION (SHAP VALUES)</div>
+            <div id="explanations">
+                <p style="font-size: 0.85rem; color: var(--text-muted);">No scan performed yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Live Fraud Operations Audit Log</h2>
+            <button class="clear-btn" onclick="clearAllLogs()">🗑️ Clear All Logs</button>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Time</th>
+                        <th>Amount (₹)</th>
+                        <th>Hour</th>
+                        <th>Distance</th>
+                        <th>Swipes/Hr</th>
+                        <th>Region</th>
+                        <th>Risk Score</th>
+                        <th>Top Risk Driver</th>
+                        <th>Decision</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="audit-body">
+                    <tr id="empty-row">
+                        <td colspan="11" style="text-align: center; color: var(--text-muted);">
+                            Scanned transactions will appear here automatically.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function formatINR(num) {
+        return '₹' + Number(num).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function loadPreset(amount, hour, distance, foreign, velocity) {
+        document.getElementById('amount').value = amount;
+        document.getElementById('hour').value = hour;
+        document.getElementById('distance').value = distance;
+        document.getElementById('foreign').value = foreign;
+        document.getElementById('tx_velocity').value = velocity;
+    }
+
+    function renderRow(entry) {
+        const isHighRisk = entry.risk_score > 60;
+        const activeColor = isHighRisk ? '#ef4444' : '#10b981';
+        const badgeClass = isHighRisk ? 'badge-block' : 'badge-safe';
+
+        return `
+            <tr>
+                <td style="color: var(--text-muted);">#${entry.id}</td>
+                <td>${entry.timestamp}</td>
+                <td style="font-weight:600;">${formatINR(entry.amount)}</td>
+                <td>${entry.hour}:00</td>
+                <td>${entry.distance} km</td>
+                <td>${entry.tx_velocity} / hr</td>
+                <td>${entry.foreign_tx === 1 ? 'International' : 'Domestic'}</td>
+                <td style="font-weight:700; color:${activeColor};">${entry.risk_score}%</td>
+                <td>${entry.top_driver}</td>
+                <td><span class="${badgeClass}">${entry.status}</span></td>
+                <td>
+                    <button class="row-del-btn" onclick="deleteSingleLog(${entry.id})" title="Delete Record">Delete</button>
+                </td>
+            </tr>
+        `;
+    }
+
+    async function loadSavedLogs() {
+        try {
+            const response = await fetch('/logs');
+            if (!response.ok) return;
+            const data = await response.json();
+
+            document.getElementById('kpi-total').innerText = data.stats.total;
+            document.getElementById('kpi-blocked').innerText = data.stats.blocked;
+            document.getElementById('kpi-safe').innerText = data.stats.safe;
+
+            const tbody = document.getElementById('audit-body');
+            if (data.logs && data.logs.length > 0) {
+                tbody.innerHTML = data.logs.map(renderRow).join('');
+            } else {
+                tbody.innerHTML = `
+                    <tr id="empty-row">
+                        <td colspan="11" style="text-align: center; color: var(--text-muted);">
+                            Scanned transactions will appear here automatically.
+                        </td>
+                    </tr>
+                `;
+            }
+        } catch (err) {
+            console.error('Failed to load audit logs:', err);
+        }
+    }
+
+    async function deleteSingleLog(id) {
+        if (!confirm(`Delete transaction record #${id} from the database?`)) return;
+        try {
+            const response = await fetch(`/logs/${id}/delete`, { method: 'POST' });
+            if (response.ok) {
+                await loadSavedLogs();
+            } else {
+                const err = await response.json();
+                alert(`Could not delete record: ${err.detail || response.statusText}`);
+            }
+        } catch (err) {
+            alert('Network error: Make sure py app.py is running.');
+        }
+    }
+
+    async function clearAllLogs() {
+        if (!confirm('Are you sure you want to permanently delete ALL records from the SQLite database?')) return;
+        try {
+            const response = await fetch('/logs/clear', { method: 'POST' });
+            if (response.ok) {
+                await loadSavedLogs();
+            } else {
+                alert(`Could not clear logs: ${response.statusText}`);
+            }
+        } catch (err) {
+            alert('Network error: Make sure py app.py is running.');
+        }
+    }
+
+    async function analyzeTransaction() {
+        const amountVal = document.getElementById('amount').value;
+        const hourVal = document.getElementById('hour').value;
+        const distanceVal = document.getElementById('distance').value;
+        const velocityVal = document.getElementById('tx_velocity').value;
+        const foreignVal = document.getElementById('foreign').value;
+
+        if (!amountVal || !hourVal || !distanceVal || !velocityVal || foreignVal === "") {
+            alert("Please fill in all fields (or click one of the preset scenario buttons above).");
+            return;
+        }
+
+        const btn = document.getElementById('submit-btn');
+        btn.innerText = 'Scanning...';
+        btn.disabled = true;
+
+        const payload = {
+            amount: parseFloat(amountVal),
+            hour: parseInt(hourVal),
+            distance: parseFloat(distanceVal),
+            foreign: parseInt(foreignVal),
+            tx_velocity: parseInt(velocityVal)
+        };
+
+        try {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            updateDashboard(payload, data);
+            await loadSavedLogs();
+        } catch (err) {
+            alert('Could not reach backend API. Make sure "py app.py" is running in your terminal.');
+        } finally {
+            btn.innerText = 'Run Real-Time Risk Scan';
+            btn.disabled = false;
+        }
+    }
+
+    function updateDashboard(payload, data) {
+        const score = data.risk_score;
+        const isHighRisk = score > 60;
+        const activeColor = isHighRisk ? '#ef4444' : '#10b981';
+
+        const gauge = document.getElementById('gauge');
+        const scoreText = document.getElementById('score-text');
+        gauge.style.background = `conic-gradient(${activeColor} ${score}%, #1f2937 ${score}%)`;
+        scoreText.innerText = `${score}%`;
+        scoreText.style.color = activeColor;
+
+        const pill = document.getElementById('status-pill');
+        const desc = document.getElementById('verdict-desc');
+        pill.innerText = data.status;
+        pill.style.background = isHighRisk ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)';
+        pill.style.color = activeColor;
+
+        const topReason = data.explanations[0]?.feature || 'Normal Pattern';
+        desc.innerText = isHighRisk
+            ? `Transaction of ${formatINR(payload.amount)} blocked automatically. Primary trigger: ${topReason}.`
+            : `Transaction of ${formatINR(payload.amount)} cleared within normal behavioral thresholds.`;
+
+        const expContainer = document.getElementById('explanations');
+        expContainer.innerHTML = '';
+
+        data.explanations.forEach(item => {
+            const increasesRisk = item.impact > 0;
+            const barColor = increasesRisk ? '#ef4444' : '#10b981';
+            const widthPct = Math.min(Math.abs(item.impact) * 45, 100);
+            const prefix = increasesRisk ? '+' : '';
+            const tag = increasesRisk ? 'Increases Risk' : 'Lowers Risk';
+
+            expContainer.innerHTML += `
+                <div class="shap-item">
+                    <div class="shap-meta">
+                        <span><strong>${item.feature}</strong> <span style="color:var(--text-muted); font-size:0.75rem;">(${tag})</span></span>
+                        <span style="color:${barColor}; font-weight:600;">${prefix}${item.impact}</span>
+                    </div>
+                    <div class="shap-track">
+                        <div class="shap-fill" style="width:${widthPct}%; background:${barColor};"></div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', loadSavedLogs);
+</script>
+
+</body>
+</html>
